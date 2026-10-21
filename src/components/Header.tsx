@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           <a
-            href="/"
+            href={import.meta.env.BASE_URL}
             onClick={(e) => {
               e.preventDefault();
               onGoHome?.();
@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2.5 cursor-pointer group"
           >
             <img
-              src="/avatar.jpg"
+              src={`${import.meta.env.BASE_URL}avatar.jpg`}
               alt="Tenrai"
               className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs group-hover:scale-105 transition-transform"
             />
