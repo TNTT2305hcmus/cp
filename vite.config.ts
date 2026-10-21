@@ -8,4 +8,5 @@ export default defineConfig({
     tailwindcss(),
     react(),
   ],
+  base: process.env.BASE_PATH || (process.env.GITHUB_ACTIONS ? '/cp/' : '/'),
 })
