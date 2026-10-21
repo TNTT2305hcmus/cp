@@ -1,17 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense, useCallback } from 'react';
 import { useKaTeX } from './utils/useKaTeX';
-import { Lesson02_TwoPointers } from './lessons/Lesson02_TwoPointers';
-import { Month02_Overview } from './lessons/Month02_Overview';
-import { Month01_Overview } from './lessons/Month01_Overview';
-import { Lesson01_VectorSorting } from './lessons/Lesson01_VectorSorting';
-import { Lesson01_Stack } from './lessons/Lesson01_Stack';
-import { Lesson01_QueueDeque } from './lessons/Lesson01_QueueDeque';
-import { Lesson01_Heap } from './lessons/Lesson01_Heap';
-import { Lesson01_BSTSet } from './lessons/Lesson01_BSTSet';
-import { Lesson01_MapHash } from './lessons/Lesson01_MapHash';
-import { Lesson01_Bitset } from './lessons/Lesson01_Bitset';
-import { Test01_Test1 } from './lessons/Test01_Test1';
-import { Test01_Test2 } from './lessons/Test01_Test2';
+import { progressService } from './services/progressService';
 import { ROADMAP_MODULES, type MonthModule, type SubTopic } from './data/roadmapData';
 import {
   Header,
@@ -20,7 +9,9 @@ import {
   Button,
   Badge,
   Card,
-  HomeLanding
+  HomeLanding,
+  ProgressSyncModal,
+  LessonLoadingFallback,
 } from './components';
 import {
   BookOpen,
@@ -28,6 +19,34 @@ import {
   Check,
   CheckCircle2
 } from 'lucide-react';
+
+// Lazy loading lessons for optimal bundle splitting and performance
+const Month01_Overview = lazy(() => import('./lessons/Month01_Overview').then(m => ({ default: m.Month01_Overview })));
+const Month02_Overview = lazy(() => import('./lessons/Month02_Overview').then(m => ({ default: m.Month02_Overview })));
+const Lesson01_VectorSorting = lazy(() => import('./lessons/Lesson01_VectorSorting').then(m => ({ default: m.Lesson01_VectorSorting })));
+const Lesson01_Stack = lazy(() => import('./lessons/Lesson01_Stack').then(m => ({ default: m.Lesson01_Stack })));
+const Lesson01_QueueDeque = lazy(() => import('./lessons/Lesson01_QueueDeque').then(m => ({ default: m.Lesson01_QueueDeque })));
+const Lesson01_Heap = lazy(() => import('./lessons/Lesson01_Heap').then(m => ({ default: m.Lesson01_Heap })));
+const Lesson01_BSTSet = lazy(() => import('./lessons/Lesson01_BSTSet').then(m => ({ default: m.Lesson01_BSTSet })));
+const Lesson01_MapHash = lazy(() => import('./lessons/Lesson01_MapHash').then(m => ({ default: m.Lesson01_MapHash })));
+const Lesson01_Bitset = lazy(() => import('./lessons/Lesson01_Bitset').then(m => ({ default: m.Lesson01_Bitset })));
+const Test01_Test1 = lazy(() => import('./lessons/Test01_Test1').then(m => ({ default: m.Test01_Test1 })));
+const Test01_Test2 = lazy(() => import('./lessons/Test01_Test2').then(m => ({ default: m.Test01_Test2 })));
+const Lesson02_TwoPointers = lazy(() => import('./lessons/Lesson02_TwoPointers').then(m => ({ default: m.Lesson02_TwoPointers })));
+
+function getSubtopicIdFromHash(): string {
+  if (typeof window === 'undefined') return 'home';
+  const hash = window.location.hash.replace(/^#\/?/, '').trim();
+  if (!hash || hash === 'home') return 'home';
+  const match = hash.match(/^(?:lesson\/|topic\/)?([0-9]+\.[0-9]+)$/);
+  if (match) return match[1];
+  return 'home';
+}
+
+function getHashFromSubtopicId(id: string): string {
+  if (id === 'home') return '';
+  return `#/lesson/${id}`;
+}
 
 export function App() {
   // Theme state: light by default
@@ -47,10 +66,20 @@ export function App() {
     }
   }, [isDark]);
 
-  // Sidebar expanded months: default open month 1 & 2
-  const [expandedMonths, setExpandedMonths] = useState<Record<number, boolean>>({
-    1: true,
-    2: true,
+  // Selected subtopic initialized from URL Hash for deep link sharing
+  const [selectedSubtopicId, setSelectedSubtopicId] = useState<string>(() => {
+    return getSubtopicIdFromHash();
+  });
+
+  // Sidebar expanded months: default open month 1 & 2 + current active month
+  const [expandedMonths, setExpandedMonths] = useState<Record<number, boolean>>(() => {
+    const initialId = getSubtopicIdFromHash();
+    const initialMonth = parseInt(initialId.split('.')[0], 10);
+    return {
+      1: true,
+      2: true,
+      ...(isNaN(initialMonth) ? {} : { [initialMonth]: true }),
+    };
   });
 
   const toggleMonth = (monthId: number) => {
@@ -60,44 +89,72 @@ export function App() {
     }));
   };
 
-  // Selected subtopic: default is 'home' (Overview Landing Page)
-  const [selectedSubtopicId, setSelectedSubtopicId] = useState<string>('home');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
 
   const mainContentRef = useRef<HTMLElement | null>(null);
   useKaTeX(mainContentRef, [selectedSubtopicId]);
 
-  // Global Progress Tracking for Trí Thanh
+  // Global Progress Tracking for Trí Thanh with progressService
   const [completedTheories, setCompletedTheories] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem('tri_thanh_theories_progress');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
+    return progressService.loadProgress().completedTheories;
   });
 
   const [completedProblems, setCompletedProblems] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem('tri_thanh_problems_progress');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
+    return progressService.loadProgress().completedProblems;
   });
 
   const toggleTheory = (subtopicId: string) => {
     const updated = { ...completedTheories, [subtopicId]: !completedTheories[subtopicId] };
     setCompletedTheories(updated);
-    localStorage.setItem('tri_thanh_theories_progress', JSON.stringify(updated));
+    progressService.saveTheories(updated);
   };
 
   const toggleProblem = (problemId: string) => {
     const updated = { ...completedProblems, [problemId]: !completedProblems[problemId] };
     setCompletedProblems(updated);
-    localStorage.setItem('tri_thanh_problems_progress', JSON.stringify(updated));
+    progressService.saveProblems(updated);
   };
+
+  const handleProgressImported = (theories: Record<string, boolean>, problems: Record<string, boolean>) => {
+    setCompletedTheories(theories);
+    setCompletedProblems(problems);
+  };
+
+  // URL Hash Synchronized Navigation
+  const navigateToSubtopic = useCallback((id: string) => {
+    setSelectedSubtopicId(id);
+    const targetHash = getHashFromSubtopicId(id);
+    if (window.location.hash !== targetHash) {
+      if (!targetHash) {
+        history.pushState(null, '', window.location.pathname + window.location.search);
+      } else {
+        window.location.hash = targetHash;
+      }
+    }
+    const monthId = parseInt(id.split('.')[0], 10);
+    if (!isNaN(monthId)) {
+      setExpandedMonths((prev) => ({ ...prev, [monthId]: true }));
+    }
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
+  // Listen to browser Back / Forward buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const id = getSubtopicIdFromHash();
+      setSelectedSubtopicId(id);
+      const monthId = parseInt(id.split('.')[0], 10);
+      if (!isNaN(monthId)) {
+        setExpandedMonths((prev) => ({ ...prev, [monthId]: true }));
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Find active subtopic and parent month
   let activeMonth: MonthModule = ROADMAP_MODULES[1];
@@ -141,14 +198,15 @@ export function App() {
         onToggleTheme={() => setIsDark(!isDark)}
         sidebarOpen={sidebarOpen}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onGoHome={() => setSelectedSubtopicId('home')}
+        onGoHome={() => navigateToSubtopic('home')}
+        onOpenSync={() => setIsSyncModalOpen(true)}
       />
 
       {/* 2. MAIN LAYOUT: FULL SCREEN HOMELANDING OR SIDEBAR + LESSON */}
       {selectedSubtopicId === 'home' ? (
         <main className="flex-1 flex flex-col justify-center items-center w-full min-h-[calc(100vh-3.5rem-4.5rem)]">
           <HomeLanding
-            onStartLearning={() => setSelectedSubtopicId('1.0')}
+            onStartLearning={() => navigateToSubtopic('1.0')}
             completedProblemsCount={Object.values(completedProblems).filter(Boolean).length}
             completedTheoriesCount={Object.values(completedTheories).filter(Boolean).length}
           />
@@ -159,7 +217,7 @@ export function App() {
           <Sidebar
             modules={filteredModules}
             selectedSubtopicId={selectedSubtopicId}
-            onSelectSubtopic={setSelectedSubtopicId}
+            onSelectSubtopic={navigateToSubtopic}
             sidebarOpen={sidebarOpen}
             onCloseSidebar={() => setSidebarOpen(false)}
             expandedMonths={expandedMonths}
@@ -168,29 +226,30 @@ export function App() {
             completedProblems={completedProblems}
           />
 
-          {/* MAIN VIEWPORT */}
+          {/* MAIN VIEWPORT WITH SUSPENSE */}
           <main ref={mainContentRef} className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto min-w-0">
-            {activeSubtopic.id === '1.0' ? (
-              <Month01_Overview
-                onSelectSubtopic={setSelectedSubtopicId}
-                completedTheories={completedTheories}
-                completedProblems={completedProblems}
-              />
-            ) : activeSubtopic.id === '1.1' ? (
-              <Lesson01_VectorSorting
-                isTheoryCompleted={!!completedTheories['1.1']}
-                onToggleTheory={() => toggleTheory('1.1')}
-                completedProblems={completedProblems}
-                onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
-              />
+            <Suspense fallback={<LessonLoadingFallback />}>
+              {activeSubtopic.id === '1.0' ? (
+                <Month01_Overview
+                  onSelectSubtopic={navigateToSubtopic}
+                  completedTheories={completedTheories}
+                  completedProblems={completedProblems}
+                />
+              ) : activeSubtopic.id === '1.1' ? (
+                <Lesson01_VectorSorting
+                  isTheoryCompleted={!!completedTheories['1.1']}
+                  onToggleTheory={() => toggleTheory('1.1')}
+                  completedProblems={completedProblems}
+                  onToggleProblem={toggleProblem}
+                  onSelectSubtopic={navigateToSubtopic}
+                />
             ) : activeSubtopic.id === '1.2' ? (
               <Lesson01_Stack
                 isTheoryCompleted={!!completedTheories['1.2']}
                 onToggleTheory={() => toggleTheory('1.2')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : activeSubtopic.id === '1.3' ? (
               <Lesson01_QueueDeque
@@ -198,7 +257,7 @@ export function App() {
                 onToggleTheory={() => toggleTheory('1.3')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : activeSubtopic.id === '1.4' ? (
               <Lesson01_Heap
@@ -206,7 +265,7 @@ export function App() {
                 onToggleTheory={() => toggleTheory('1.4')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : activeSubtopic.id === '1.5' ? (
               <Lesson01_BSTSet
@@ -214,7 +273,7 @@ export function App() {
                 onToggleTheory={() => toggleTheory('1.5')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : activeSubtopic.id === '1.6' ? (
               <Lesson01_MapHash
@@ -222,7 +281,7 @@ export function App() {
                 onToggleTheory={() => toggleTheory('1.6')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : activeSubtopic.id === '1.7' ? (
               <Lesson01_Bitset
@@ -230,21 +289,21 @@ export function App() {
                 onToggleTheory={() => toggleTheory('1.7')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : activeSubtopic.id === '1.8' ? (
               <Test01_Test1
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
                 completedTheories={completedTheories}
               />
             ) : activeSubtopic.id === '1.9' ? (
               <Test01_Test2
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
                 completedTheories={completedTheories}
               />
             ) : activeSubtopic.id === '2.0' ? (
               <Month02_Overview
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
                 completedTheories={completedTheories}
                 completedProblems={completedProblems}
               />
@@ -254,7 +313,7 @@ export function App() {
                 onToggleTheory={() => toggleTheory('2.1')}
                 completedProblems={completedProblems}
                 onToggleProblem={toggleProblem}
-                onSelectSubtopic={setSelectedSubtopicId}
+                onSelectSubtopic={navigateToSubtopic}
               />
             ) : (
               <div className="max-w-4xl mx-auto space-y-6">
@@ -263,7 +322,7 @@ export function App() {
                 <nav className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                   <button
                     type="button"
-                    onClick={() => setSelectedSubtopicId('home')}
+                    onClick={() => navigateToSubtopic('home')}
                     className="hover:text-teal-600 dark:hover:text-teal-400 transition cursor-pointer underline-offset-2 hover:underline"
                   >
                     Lộ trình CP
@@ -271,7 +330,7 @@ export function App() {
                   <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <button
                     type="button"
-                    onClick={() => setSelectedSubtopicId(`${activeMonth.id}.0`)}
+                    onClick={() => navigateToSubtopic(`${activeMonth.id}.0`)}
                     className="hover:text-teal-600 dark:hover:text-teal-400 transition cursor-pointer underline-offset-2 hover:underline"
                     title={`Xem Tổng Quan ${activeMonth.monthLabel}`}
                   >
@@ -349,12 +408,22 @@ export function App() {
 
             </div>
           )}
+            </Suspense>
         </main>
       </div>
       )}
 
       {/* 3. FOOTER */}
       <Footer />
+
+      {/* 4. PROGRESS SYNC / BACKUP MODAL */}
+      <ProgressSyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        completedTheories={completedTheories}
+        completedProblems={completedProblems}
+        onProgressImported={handleProgressImported}
+      />
 
     </div>
   );

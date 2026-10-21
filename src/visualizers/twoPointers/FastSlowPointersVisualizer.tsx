@@ -18,17 +18,24 @@ export interface Model2Step {
   action: 'init' | 'match' | 'diff' | 'done';
 }
 
+const model2Datasets = [
+  { label: 'Có trùng: [1, 1, 2, 2, 3, 4, 4, 5]', arr: [1, 1, 2, 2, 3, 4, 4, 5] },
+  { label: 'Không trùng: [1, 2, 3, 4, 5]', arr: [1, 2, 3, 4, 5] },
+  { label: 'Toàn bộ trùng: [2, 2, 2, 2]', arr: [2, 2, 2, 2] },
+];
+
 export const FastSlowPointersVisualizer: React.FC = () => {
-  const model2Datasets = [
-    { label: 'Có trùng: [1, 1, 2, 2, 3, 4, 4, 5]', arr: [1, 1, 2, 2, 3, 4, 4, 5] },
-    { label: 'Không trùng: [1, 2, 3, 4, 5]', arr: [1, 2, 3, 4, 5] },
-    { label: 'Toàn bộ trùng: [2, 2, 2, 2]', arr: [2, 2, 2, 2] },
-  ];
   const [selectedM2DataIndex, setSelectedM2DataIndex] = useState<number>(0);
   const [model2Index, setModel2Index] = useState<number>(0);
   const [model2Playing, setModel2Playing] = useState<boolean>(false);
   const [model2Speed, setModel2Speed] = useState<number>(650);
   const model2TimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectDataset = (idx: number) => {
+    setSelectedM2DataIndex(idx);
+    setModel2Index(0);
+    setModel2Playing(false);
+  };
 
   const model2Steps = useMemo<Model2Step[]>(() => {
     const raw = [...model2Datasets[selectedM2DataIndex].arr];
@@ -86,11 +93,6 @@ export const FastSlowPointersVisualizer: React.FC = () => {
   }, [selectedM2DataIndex]);
 
   useEffect(() => {
-    setModel2Index(0);
-    setModel2Playing(false);
-  }, [selectedM2DataIndex]);
-
-  useEffect(() => {
     if (model2Playing) {
       model2TimerRef.current = setInterval(() => {
         setModel2Index((prev) => {
@@ -124,7 +126,7 @@ export const FastSlowPointersVisualizer: React.FC = () => {
           <span className="text-xs text-slate-500">Bộ test:</span>
           <select
             value={selectedM2DataIndex}
-            onChange={(e) => setSelectedM2DataIndex(Number(e.target.value))}
+            onChange={(e) => handleSelectDataset(Number(e.target.value))}
             className="text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 font-mono text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             {model2Datasets.map((d, idx) => (

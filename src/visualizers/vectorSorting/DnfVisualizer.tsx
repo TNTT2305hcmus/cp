@@ -19,17 +19,24 @@ export interface DNFStep {
   reason: string;
 }
 
+const dnfDatasets = [
+  { label: 'Bộ mẫu chuẩn (xáo trộn)', arr: [2, 0, 2, 1, 1, 0, 2, 1] },
+  { label: 'Đã sắp xếp sẵn', arr: [0, 0, 1, 1, 2, 2] },
+  { label: 'Sắp xếp ngược', arr: [2, 2, 1, 1, 0, 0] },
+];
+
 export const DnfVisualizer: React.FC = () => {
-  const dnfDatasets = [
-    { label: 'Bộ mẫu chuẩn (xáo trộn)', arr: [2, 0, 2, 1, 1, 0, 2, 1] },
-    { label: 'Đã sắp xếp sẵn', arr: [0, 0, 1, 1, 2, 2] },
-    { label: 'Sắp xếp ngược', arr: [2, 2, 1, 1, 0, 0] },
-  ];
   const [selectedDnfDataIndex, setSelectedDnfDataIndex] = useState<number>(0);
   const [dnfIndex, setDnfIndex] = useState<number>(0);
   const [dnfPlaying, setDnfPlaying] = useState<boolean>(false);
   const [dnfSpeed, setDnfSpeed] = useState<number>(650);
   const dnfTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectDnfDataset = (idx: number) => {
+    setSelectedDnfDataIndex(idx);
+    setDnfIndex(0);
+    setDnfPlaying(false);
+  };
 
   const dnfSteps = useMemo<DNFStep[]>(() => {
     const raw = [...dnfDatasets[selectedDnfDataIndex].arr];
@@ -113,11 +120,6 @@ export const DnfVisualizer: React.FC = () => {
   }, [selectedDnfDataIndex]);
 
   useEffect(() => {
-    setDnfIndex(0);
-    setDnfPlaying(false);
-  }, [selectedDnfDataIndex]);
-
-  useEffect(() => {
     if (dnfPlaying) {
       dnfTimerRef.current = setInterval(() => {
         setDnfIndex((prev) => {
@@ -152,7 +154,7 @@ export const DnfVisualizer: React.FC = () => {
           <span className="text-xs text-slate-500">Bộ dữ liệu:</span>
           <select
             value={selectedDnfDataIndex}
-            onChange={(e) => setSelectedDnfDataIndex(Number(e.target.value))}
+            onChange={(e) => handleSelectDnfDataset(Number(e.target.value))}
             className="text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 font-mono text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             {dnfDatasets.map((d, idx) => (

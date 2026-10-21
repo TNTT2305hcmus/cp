@@ -15,18 +15,24 @@ export interface StreamHeapStep {
   reason: string;
 }
 
-export const StreamHeapVisualizer: React.FC = () => {
-  const streamDatasets = [
-    { label: 'Dãy 1: [4, 5, 8, 2, 3, 5, 10, 9, 4] (K = 3)', k: 3, stream: [4, 5, 8, 2, 3, 5, 10, 9, 4] },
-    { label: 'Dãy 2: [12, 3, 17, 8, 30, 25] (K = 2)', k: 2, stream: [12, 3, 17, 8, 30, 25] },
-    { label: 'Dãy 3: [7, 7, 7, 7, 8, 6] (K = 3)', k: 3, stream: [7, 7, 7, 7, 8, 6] },
-  ];
+const streamDatasets = [
+  { label: 'Dãy 1: [4, 5, 8, 2, 3, 5, 10, 9, 4] (K = 3)', k: 3, stream: [4, 5, 8, 2, 3, 5, 10, 9, 4] },
+  { label: 'Dãy 2: [12, 3, 17, 8, 30, 25] (K = 2)', k: 2, stream: [12, 3, 17, 8, 30, 25] },
+  { label: 'Dãy 3: [7, 7, 7, 7, 8, 6] (K = 3)', k: 3, stream: [7, 7, 7, 7, 8, 6] },
+];
 
+export const StreamHeapVisualizer: React.FC = () => {
   const [selectedStreamIdx, setSelectedStreamIdx] = useState<number>(0);
   const [streamIndex, setStreamIndex] = useState<number>(0);
   const [streamPlaying, setStreamPlaying] = useState<boolean>(false);
   const [streamSpeed, setStreamSpeed] = useState<number>(750);
   const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectStreamDataset = (idx: number) => {
+    setSelectedStreamIdx(idx);
+    setStreamIndex(0);
+    setStreamPlaying(false);
+  };
 
   const activeStreamConfig = streamDatasets[selectedStreamIdx];
 
@@ -135,11 +141,6 @@ export const StreamHeapVisualizer: React.FC = () => {
   }, [activeStreamConfig]);
 
   useEffect(() => {
-    setStreamIndex(0);
-    setStreamPlaying(false);
-  }, [selectedStreamIdx]);
-
-  useEffect(() => {
     if (streamPlaying) {
       streamTimerRef.current = setInterval(() => {
         setStreamIndex((prev) => {
@@ -177,7 +178,7 @@ export const StreamHeapVisualizer: React.FC = () => {
           <button
             key={idx}
             type="button"
-            onClick={() => setSelectedStreamIdx(idx)}
+            onClick={() => handleSelectStreamDataset(idx)}
             className={`px-2.5 py-1 text-xs rounded-lg border transition cursor-pointer ${
               selectedStreamIdx === idx
                 ? 'bg-teal-600 text-white border-teal-600 font-semibold'

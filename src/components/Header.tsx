@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Search, Menu, X } from 'lucide-react';
+import { Sun, Moon, Search, Menu, X, Save } from 'lucide-react';
 
 export interface HeaderProps {
   searchQuery: string;
@@ -9,6 +9,7 @@ export interface HeaderProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
   onGoHome?: () => void;
+  onOpenSync?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   sidebarOpen,
   onToggleSidebar,
   onGoHome,
+  onOpenSync,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0c1017]/95 backdrop-blur-md transition-colors">
@@ -73,6 +75,18 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-700/60 text-xs font-semibold text-amber-700 dark:text-amber-300">
             <span>Mục tiêu: Guardian 2100+</span>
           </div>
+
+          {/* Progress Sync / Backup Button */}
+          {onOpenSync && (
+            <button
+              onClick={onOpenSync}
+              className="p-2 rounded-lg text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition cursor-pointer"
+              title="Sao lưu & Phục hồi tiến độ học"
+              aria-label="Sao lưu tiến độ"
+            >
+              <Save className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Theme Toggle Button */}
           <button

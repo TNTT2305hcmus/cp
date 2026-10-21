@@ -17,27 +17,33 @@ export interface SlidingSetStep {
   reason: string;
 }
 
-export const SlidingSetVisualizer: React.FC = () => {
-  const slidingDatasets = [
-    {
-      label: 'Có nghiệm: nums = [1, 5, 9, 1, 5, 9], k = 2, t = 3',
-      nums: [1, 5, 9, 1, 5, 9],
-      k: 2,
-      t: 3,
-    },
-    {
-      label: 'Không nghiệm: nums = [1, 2, 3, 1], k = 3, t = 0 (trùng tại k=3)',
-      nums: [1, 2, 3, 1],
-      k: 3,
-      t: 0,
-    },
-  ];
+const slidingDatasets = [
+  {
+    label: 'Có nghiệm: nums = [1, 5, 9, 1, 5, 9], k = 2, t = 3',
+    nums: [1, 5, 9, 1, 5, 9],
+    k: 2,
+    t: 3,
+  },
+  {
+    label: 'Không nghiệm: nums = [1, 2, 3, 1], k = 3, t = 0 (trùng tại k=3)',
+    nums: [1, 2, 3, 1],
+    k: 3,
+    t: 0,
+  },
+];
 
+export const SlidingSetVisualizer: React.FC = () => {
   const [selectedSlidingIdx, setSelectedSlidingIdx] = useState<number>(0);
   const [slidingIndex, setSlidingIndex] = useState<number>(0);
   const [slidingPlaying, setSlidingPlaying] = useState<boolean>(false);
   const [slidingSpeed, setSlidingSpeed] = useState<number>(850);
   const slidingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectSlidingDataset = (idx: number) => {
+    setSelectedSlidingIdx(idx);
+    setSlidingIndex(0);
+    setSlidingPlaying(false);
+  };
 
   const activeSlidingConfig = slidingDatasets[selectedSlidingIdx];
 
@@ -156,11 +162,6 @@ export const SlidingSetVisualizer: React.FC = () => {
   }, [activeSlidingConfig]);
 
   useEffect(() => {
-    setSlidingIndex(0);
-    setSlidingPlaying(false);
-  }, [selectedSlidingIdx]);
-
-  useEffect(() => {
     if (slidingPlaying) {
       slidingTimerRef.current = setInterval(() => {
         setSlidingIndex((prev) => {
@@ -198,7 +199,7 @@ export const SlidingSetVisualizer: React.FC = () => {
           <button
             key={idx}
             type="button"
-            onClick={() => setSelectedSlidingIdx(idx)}
+            onClick={() => handleSelectSlidingDataset(idx)}
             className={`px-2.5 py-1 text-xs rounded-lg border transition cursor-pointer ${
               selectedSlidingIdx === idx
                 ? 'bg-teal-600 text-white border-teal-600 font-semibold'

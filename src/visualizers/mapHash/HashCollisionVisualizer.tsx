@@ -22,6 +22,12 @@ export const HashCollisionVisualizer: React.FC = () => {
   const [collisionSpeed, setCollisionSpeed] = useState<number>(800);
   const collisionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const handleSelectScenario = (scenario: 'UNIFORM' | 'ANTI_HASH') => {
+    setHashScenario(scenario);
+    setCollisionIndex(0);
+    setCollisionPlaying(false);
+  };
+
   const numBuckets = 7;
 
   const collisionSteps = useMemo<HashCollisionStep[]>(() => {
@@ -111,11 +117,6 @@ export const HashCollisionVisualizer: React.FC = () => {
   }, [hashScenario]);
 
   useEffect(() => {
-    setCollisionIndex(0);
-    setCollisionPlaying(false);
-  }, [hashScenario]);
-
-  useEffect(() => {
     if (collisionPlaying) {
       collisionTimerRef.current = setInterval(() => {
         setCollisionIndex((prev) => {
@@ -151,7 +152,7 @@ export const HashCollisionVisualizer: React.FC = () => {
         <span className="text-xs text-slate-500 font-medium">Chọn kịch bản:</span>
         <button
           type="button"
-          onClick={() => setHashScenario('ANTI_HASH')}
+          onClick={() => handleSelectScenario('ANTI_HASH')}
           className={`px-3 py-1.5 text-xs rounded-lg border font-mono transition cursor-pointer ${
             hashScenario === 'ANTI_HASH'
               ? 'bg-rose-600 text-white border-rose-600 font-bold shadow-xs'
@@ -162,7 +163,7 @@ export const HashCollisionVisualizer: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={() => setHashScenario('UNIFORM')}
+          onClick={() => handleSelectScenario('UNIFORM')}
           className={`px-3 py-1.5 text-xs rounded-lg border font-mono transition cursor-pointer ${
             hashScenario === 'UNIFORM'
               ? 'bg-teal-600 text-white border-teal-600 font-bold shadow-xs'

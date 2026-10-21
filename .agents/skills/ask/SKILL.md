@@ -1,24 +1,26 @@
 ---
 name: ask
-description: "Answer questions about code, architecture, and technical decisions — no implementation. Trigger on questions asking 'why', 'what does this do', 'what is the purpose of', 'explain', 'what's the difference', 'compare', or 'what are the tradeoffs' — even when referencing specific files, code snippets, or inline code. The key signal is the user wants to UNDERSTAND something, not change it. Do NOT trigger for requests to build, fix, plan, review, research, or add/modify code."
-argument-hint: question
+description: Explain this CP learning platform's code, architecture, algorithms, or technical tradeoffs without changing files. Use when the user wants to understand why or how something works; do not use for implementation, debugging, planning, or code review.
 ---
 
-Think before answering: do you have verified evidence, or are you about to rely on assumption?
+# Explain from verified project evidence
 
-## Verify Before You Answer
+Read the relevant source before answering. For project-wide questions, inspect the smallest useful set among `package.json`, `vite.config.ts`, `src/App.tsx`, shared components, lesson data, visualizers, and `docs/`.
 
-Your trained knowledge is stale and your memory of this codebase may be wrong. Verify from source before claiming anything:
+Distinguish verified behavior from inference. Verify current library or platform behavior from primary documentation when it could have changed.
 
-- **Question about specific code?** → Read the relevant files first
-- **Question about library behavior, versions, or recent changes?** → Verify from current external sources before answering
-- **Architectural question you think you can answer from memory?** → Still check the actual codebase — confirm before claiming
+## Project context
 
-## Explain, don't implement
+- The application is a client-only React 19, TypeScript, Vite 8, and Tailwind CSS 4 site.
+- Lesson navigation currently lives in React state; progress and theme live in `localStorage`.
+- `docs/TEMPLATE_LESSON.md` is the authoritative lesson specification. `docs/ROADMAP.md` and `docs/PLANNING.md` define curriculum scope.
+- GitHub Pages deployment uses a repository subpath, so root-relative asset behavior is relevant when explaining deployment.
 
-This skill ends at the explanation — the user decides what to do next. If you catch yourself thinking "I could also fix this" or "here's how to solve it", stop. Explain only.
+For algorithm questions, lead with constraints and target complexity, then explain the invariant, edge cases, and CP-specific implementation tradeoffs. Do not reveal a full solution when the user asks for a hint; follow the three-tier hint model in `AGENTS.md`.
 
-This is not a coding session. No code blocks — not even to illustrate format or behavior. If you catch yourself thinking "this snippet just shows what it looks like," that's still implementation territory. Explain in prose.
+## Boundary
+
+Explain only. Do not edit files, provide implementation patches, or silently turn the question into a review. Small illustrative pseudocode is acceptable only when necessary to explain an algorithm and when it does not bypass the requested hint level.
 
 ## Question
 

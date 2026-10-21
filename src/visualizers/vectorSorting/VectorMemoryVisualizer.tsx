@@ -25,6 +25,12 @@ export const VectorMemoryVisualizer: React.FC = () => {
   const [vectorSpeed, setVectorSpeed] = useState<number>(650);
   const vectorTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const handleToggleReserve = () => {
+    setUseReserve((prev) => !prev);
+    setVectorIndex(0);
+    setVectorPlaying(false);
+  };
+
   const vectorSteps = useMemo<VectorStep[]>(() => {
     const rawValues = [12, 45, 78, 23, 56, 89, 34, 67];
     const steps: VectorStep[] = [];
@@ -81,11 +87,6 @@ export const VectorMemoryVisualizer: React.FC = () => {
   }, [useReserve]);
 
   useEffect(() => {
-    setVectorIndex(0);
-    setVectorPlaying(false);
-  }, [useReserve]);
-
-  useEffect(() => {
     if (vectorPlaying) {
       vectorTimerRef.current = setInterval(() => {
         setVectorIndex((prev) => {
@@ -128,7 +129,7 @@ export const VectorMemoryVisualizer: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setUseReserve(!useReserve)}
+            onClick={handleToggleReserve}
             className={`text-xs px-2.5 py-1 rounded-md font-mono font-semibold transition cursor-pointer border ${
               useReserve
                 ? 'bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-300 border-teal-400'

@@ -17,15 +17,22 @@ export interface BoundSearchStep {
   reason: string;
 }
 
+const sortedArray = [10, 20, 20, 20, 35, 50, 65, 80];
+const targetOptions = [20, 30, 50, 5, 90];
+
 export const BoundSearchVisualizer: React.FC = () => {
-  const sortedArray = useMemo(() => [10, 20, 20, 20, 35, 50, 65, 80], []);
-  const targetOptions = [20, 30, 50, 5, 90];
   const [selectedTarget, setSelectedTarget] = useState<number>(20);
 
   const [boundIndex, setBoundIndex] = useState<number>(0);
   const [boundPlaying, setBoundPlaying] = useState<boolean>(false);
   const [boundSpeed, setBoundSpeed] = useState<number>(750);
   const boundTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectTarget = (tVal: number) => {
+    setSelectedTarget(tVal);
+    setBoundIndex(0);
+    setBoundPlaying(false);
+  };
 
   const boundSteps = useMemo<BoundSearchStep[]>(() => {
     const steps: BoundSearchStep[] = [];
@@ -116,11 +123,6 @@ export const BoundSearchVisualizer: React.FC = () => {
     });
 
     return steps;
-  }, [sortedArray, selectedTarget]);
-
-  useEffect(() => {
-    setBoundIndex(0);
-    setBoundPlaying(false);
   }, [selectedTarget]);
 
   useEffect(() => {
@@ -161,7 +163,7 @@ export const BoundSearchVisualizer: React.FC = () => {
           <button
             key={tVal}
             type="button"
-            onClick={() => setSelectedTarget(tVal)}
+            onClick={() => handleSelectTarget(tVal)}
             className={`px-3 py-1 text-xs rounded-lg border font-mono transition cursor-pointer ${
               selectedTarget === tVal
                 ? 'bg-teal-600 text-white border-teal-600 font-bold'

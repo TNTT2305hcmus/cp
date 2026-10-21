@@ -19,17 +19,24 @@ export interface MonotonicStep {
   reason: string;
 }
 
+const monoDatasets = [
+  { label: 'Nhiệt độ mẫu: [73, 74, 75, 71, 69, 72, 76, 73]', arr: [73, 74, 75, 71, 69, 72, 76, 73] },
+  { label: 'Giảm dần: [90, 80, 70, 60]', arr: [90, 80, 70, 60] },
+  { label: 'Tăng dần: [60, 70, 80, 90]', arr: [60, 70, 80, 90] },
+];
+
 export const MonotonicStackVisualizer: React.FC = () => {
-  const monoDatasets = [
-    { label: 'Nhiệt độ mẫu: [73, 74, 75, 71, 69, 72, 76, 73]', arr: [73, 74, 75, 71, 69, 72, 76, 73] },
-    { label: 'Giảm dần: [90, 80, 70, 60]', arr: [90, 80, 70, 60] },
-    { label: 'Tăng dần: [60, 70, 80, 90]', arr: [60, 70, 80, 90] },
-  ];
   const [selectedMonoDataIndex, setSelectedMonoDataIndex] = useState<number>(0);
   const [monoIndex, setMonoIndex] = useState<number>(0);
   const [monoPlaying, setMonoPlaying] = useState<boolean>(false);
   const [monoSpeed, setMonoSpeed] = useState<number>(650);
   const monoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectMonoDataset = (idx: number) => {
+    setSelectedMonoDataIndex(idx);
+    setMonoIndex(0);
+    setMonoPlaying(false);
+  };
 
   const monoSteps = useMemo<MonotonicStep[]>(() => {
     const rawTemps = [...monoDatasets[selectedMonoDataIndex].arr];
@@ -92,11 +99,6 @@ export const MonotonicStackVisualizer: React.FC = () => {
   }, [selectedMonoDataIndex]);
 
   useEffect(() => {
-    setMonoIndex(0);
-    setMonoPlaying(false);
-  }, [selectedMonoDataIndex]);
-
-  useEffect(() => {
     if (monoPlaying) {
       monoTimerRef.current = setInterval(() => {
         setMonoIndex((prev) => {
@@ -130,7 +132,7 @@ export const MonotonicStackVisualizer: React.FC = () => {
           <span className="text-xs text-slate-500">Bộ test:</span>
           <select
             value={selectedMonoDataIndex}
-            onChange={(e) => setSelectedMonoDataIndex(Number(e.target.value))}
+            onChange={(e) => handleSelectMonoDataset(Number(e.target.value))}
             className="text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 font-mono text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             {monoDatasets.map((d, idx) => (

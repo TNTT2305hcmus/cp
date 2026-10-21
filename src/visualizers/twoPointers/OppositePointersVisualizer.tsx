@@ -19,17 +19,24 @@ export interface Model1Step {
   highlightedIndices: number[];
 }
 
+const model1Datasets = [
+  { label: 'Có đáp án (Target = 19)', arr: [2, 3, 5, 8, 11, 15, 18, 22], target: 19 },
+  { label: 'Không có đáp án (Target = 24)', arr: [2, 3, 5, 8, 11, 15, 18, 22], target: 24 },
+  { label: 'Mảng có số âm (Target = 0)', arr: [-8, -3, -1, 0, 1, 4, 8, 12], target: 0 },
+];
+
 export const OppositePointersVisualizer: React.FC = () => {
-  const model1Datasets = [
-    { label: 'Có đáp án (Target = 19)', arr: [2, 3, 5, 8, 11, 15, 18, 22], target: 19 },
-    { label: 'Không có đáp án (Target = 24)', arr: [2, 3, 5, 8, 11, 15, 18, 22], target: 24 },
-    { label: 'Mảng có số âm (Target = 0)', arr: [-8, -3, -1, 0, 1, 4, 8, 12], target: 0 },
-  ];
   const [selectedM1DataIndex, setSelectedM1DataIndex] = useState<number>(0);
   const [model1Index, setModel1Index] = useState<number>(0);
   const [model1Playing, setModel1Playing] = useState<boolean>(false);
   const [model1Speed, setModel1Speed] = useState<number>(650);
   const model1TimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectDataset = (idx: number) => {
+    setSelectedM1DataIndex(idx);
+    setModel1Index(0);
+    setModel1Playing(false);
+  };
 
   const model1Steps = useMemo<Model1Step[]>(() => {
     const data = model1Datasets[selectedM1DataIndex];
@@ -108,11 +115,6 @@ export const OppositePointersVisualizer: React.FC = () => {
   }, [selectedM1DataIndex]);
 
   useEffect(() => {
-    setModel1Index(0);
-    setModel1Playing(false);
-  }, [selectedM1DataIndex]);
-
-  useEffect(() => {
     if (model1Playing) {
       model1TimerRef.current = setInterval(() => {
         setModel1Index((prev) => {
@@ -147,7 +149,7 @@ export const OppositePointersVisualizer: React.FC = () => {
           <span className="text-xs text-slate-500">Bộ test:</span>
           <select
             value={selectedM1DataIndex}
-            onChange={(e) => setSelectedM1DataIndex(Number(e.target.value))}
+            onChange={(e) => handleSelectDataset(Number(e.target.value))}
             className="text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 font-mono text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             {model1Datasets.map((d, idx) => (

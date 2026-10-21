@@ -15,16 +15,23 @@ export interface TwoHeapsStep {
   reason: string;
 }
 
+const twoHeapsDatasets = [
+  { label: 'Luồng số: [5, 15, 1, 3, 8, 9]', stream: [5, 15, 1, 3, 8, 9] },
+  { label: 'Luồng tăng dần: [1, 2, 3, 4, 5]', stream: [1, 2, 3, 4, 5] },
+];
+
 export const TwoHeapsVisualizer: React.FC = () => {
-  const twoHeapsDatasets = [
-    { label: 'Luồng số: [5, 15, 1, 3, 8, 9]', stream: [5, 15, 1, 3, 8, 9] },
-    { label: 'Luồng tăng dần: [1, 2, 3, 4, 5]', stream: [1, 2, 3, 4, 5] },
-  ];
   const [selectedTwoHeapIdx, setSelectedTwoHeapIdx] = useState<number>(0);
   const [twoHeapIndex, setTwoHeapIndex] = useState<number>(0);
   const [twoHeapPlaying, setTwoHeapPlaying] = useState<boolean>(false);
   const [twoHeapSpeed, setTwoHeapSpeed] = useState<number>(750);
   const twoHeapTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectTwoHeapDataset = (idx: number) => {
+    setSelectedTwoHeapIdx(idx);
+    setTwoHeapIndex(0);
+    setTwoHeapPlaying(false);
+  };
 
   const twoHeapsSteps = useMemo<TwoHeapsStep[]>(() => {
     const rawStream = twoHeapsDatasets[selectedTwoHeapIdx].stream;
@@ -100,11 +107,6 @@ export const TwoHeapsVisualizer: React.FC = () => {
   }, [selectedTwoHeapIdx]);
 
   useEffect(() => {
-    setTwoHeapIndex(0);
-    setTwoHeapPlaying(false);
-  }, [selectedTwoHeapIdx]);
-
-  useEffect(() => {
     if (twoHeapPlaying) {
       twoHeapTimerRef.current = setInterval(() => {
         setTwoHeapIndex((prev) => {
@@ -142,7 +144,7 @@ export const TwoHeapsVisualizer: React.FC = () => {
           <button
             key={idx}
             type="button"
-            onClick={() => setSelectedTwoHeapIdx(idx)}
+            onClick={() => handleSelectTwoHeapDataset(idx)}
             className={`px-2.5 py-1 text-xs rounded-lg border transition cursor-pointer ${
               selectedTwoHeapIdx === idx
                 ? 'bg-amber-600 text-white border-amber-600 font-semibold'

@@ -15,17 +15,24 @@ export interface BitsetDPStep {
   reason: string;
 }
 
+const dpDatasets = [
+  { label: 'Tập số [2, 3, 7] (W = 12)', weights: [2, 3, 7], maxWeight: 14 },
+  { label: 'Tập số [3, 5, 4] (W = 12)', weights: [3, 5, 4], maxWeight: 14 },
+  { label: 'Tập số [1, 2, 4, 8] (Lũy thừa 2)', weights: [1, 2, 4, 8], maxWeight: 16 },
+];
+
 export const BitsetSubsetSumVisualizer: React.FC = () => {
-  const dpDatasets = [
-    { label: 'Tập số [2, 3, 7] (W = 12)', weights: [2, 3, 7], maxWeight: 14 },
-    { label: 'Tập số [3, 5, 4] (W = 12)', weights: [3, 5, 4], maxWeight: 14 },
-    { label: 'Tập số [1, 2, 4, 8] (Lũy thừa 2)', weights: [1, 2, 4, 8], maxWeight: 16 },
-  ];
   const [selectedDpDataIdx, setSelectedDpDataIdx] = useState<number>(0);
   const [dpIndex, setDpIndex] = useState<number>(0);
   const [dpPlaying, setDpPlaying] = useState<boolean>(false);
   const [dpSpeed, setDpSpeed] = useState<number>(850);
   const dpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectDpDataset = (idx: number) => {
+    setSelectedDpDataIdx(idx);
+    setDpIndex(0);
+    setDpPlaying(false);
+  };
 
   const activeDpConfig = dpDatasets[selectedDpDataIdx];
 
@@ -104,11 +111,6 @@ export const BitsetSubsetSumVisualizer: React.FC = () => {
   }
 
   useEffect(() => {
-    setDpIndex(0);
-    setDpPlaying(false);
-  }, [selectedDpDataIdx]);
-
-  useEffect(() => {
     if (dpPlaying) {
       dpTimerRef.current = setInterval(() => {
         setDpIndex((prev) => {
@@ -146,7 +148,7 @@ export const BitsetSubsetSumVisualizer: React.FC = () => {
           <button
             key={idx}
             type="button"
-            onClick={() => setSelectedDpDataIdx(idx)}
+            onClick={() => handleSelectDpDataset(idx)}
             className={`px-2.5 py-1 text-xs rounded-lg border transition cursor-pointer ${
               selectedDpDataIdx === idx
                 ? 'bg-teal-600 text-white border-teal-600 font-semibold'

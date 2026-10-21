@@ -17,17 +17,24 @@ export interface ParenthesesStep {
   reason: string;
 }
 
+const parenDatasets = [
+  { label: 'Hợp lệ: {[()]}', str: ['{', '[', '(', ')', ']', '}'] },
+  { label: 'Lỗi không khớp: {[(])}', str: ['{', '[', '(', ']', ')', '}'] },
+  { label: 'Lỗi thiếu ngoặc đóng: ((()', str: ['(', '(', '(', ')'] },
+];
+
 export const ParenthesesStackVisualizer: React.FC = () => {
-  const parenDatasets = [
-    { label: 'Hợp lệ: {[()]}', str: ['{', '[', '(', ')', ']', '}'] },
-    { label: 'Lỗi không khớp: {[(])}', str: ['{', '[', '(', ']', ')', '}'] },
-    { label: 'Lỗi thiếu ngoặc đóng: ((()', str: ['(', '(', '(', ')'] },
-  ];
   const [selectedParenDataIndex, setSelectedParenDataIndex] = useState<number>(0);
   const [parenIndex, setParenIndex] = useState<number>(0);
   const [parenPlaying, setParenPlaying] = useState<boolean>(false);
   const [parenSpeed, setParenSpeed] = useState<number>(650);
   const parenTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleSelectParenDataset = (idx: number) => {
+    setSelectedParenDataIndex(idx);
+    setParenIndex(0);
+    setParenPlaying(false);
+  };
 
   const parenSteps = useMemo<ParenthesesStep[]>(() => {
     const rawChars = [...parenDatasets[selectedParenDataIndex].str];
@@ -125,11 +132,6 @@ export const ParenthesesStackVisualizer: React.FC = () => {
   }, [selectedParenDataIndex]);
 
   useEffect(() => {
-    setParenIndex(0);
-    setParenPlaying(false);
-  }, [selectedParenDataIndex]);
-
-  useEffect(() => {
     if (parenPlaying) {
       parenTimerRef.current = setInterval(() => {
         setParenIndex((prev) => {
@@ -162,7 +164,7 @@ export const ParenthesesStackVisualizer: React.FC = () => {
           <span className="text-xs text-slate-500">Bộ test:</span>
           <select
             value={selectedParenDataIndex}
-            onChange={(e) => setSelectedParenDataIndex(Number(e.target.value))}
+            onChange={(e) => handleSelectParenDataset(Number(e.target.value))}
             className="text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 font-mono text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             {parenDatasets.map((d, idx) => (

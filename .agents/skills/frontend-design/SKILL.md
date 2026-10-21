@@ -1,107 +1,31 @@
 ---
 name: frontend-design
-description: "Builds distinctive, production-grade UIs that avoid generic AI aesthetics. Use whenever the user wants to build, restyle, or give visual direction to any interface — pages, dashboards, landing pages, components, onboarding flows, mobile screens, or design systems — even without an explicit 'design' request. Also triggers for: picking an aesthetic direction, improving the look of a dull/generic existing page, adding visual personality, or choosing colors/typography. Includes a bundled design intelligence database for concrete guidance across web (React, Next.js, Vue, Tailwind) and mobile (React Native, Flutter, SwiftUI)."
+description: Design or restyle interfaces for this competitive-programming lesson platform while preserving its established educational design system. Use for pages, lesson components, visualizers, responsive layout, interaction polish, or accessibility-focused UI changes.
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+# Design for learning clarity
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+Create production-quality interfaces that feel like one coherent CP learning product. The goal is rapid comprehension and deliberate practice, not visual novelty for its own sake.
 
-## Design Thinking
+Before changing a lesson or visualizer, read `docs/TEMPLATE_LESSON.md` completely. It overrides generic design preferences. Inspect the closest existing component and reuse shared primitives from `src/components` and `src/components/lesson`.
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
-- **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-- **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+## Established visual language
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+- Support the current light-first interface and dark IDE mode rather than inventing a separate theme.
+- Use the established typography: Inter or Roboto for prose and JetBrains Mono or Fira Code for code.
+- Preserve the semantic accent mapping: cyan for pointer/state A, amber for pointer/state B, fuchsia for the active item, emerald for success, and rose for invalid states.
+- Prefer a readable single-column lesson flow, restrained cards, thin borders, stable layouts, and compact metadata.
+- Use the installed Lucide icon set. Do not add decorative emoji or another icon library.
+- Avoid purple-gradient AI styling, excessive glass effects, animated decoration, oversized hero copy, and motion that competes with algorithm state.
 
-Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
-- Production-grade and functional
-- Visually striking and memorable
-- Cohesive with a clear aesthetic point-of-view
-- Meticulously refined in every detail
+## Interaction quality
 
-## Frontend Aesthetics Guidelines
+- Make each control's state and affordance obvious at keyboard, touch, and desktop sizes.
+- Preserve WCAG AA contrast, visible focus states, semantic labels, and `aria-live="polite"` for step explanations.
+- Keep array cells and graph nodes spatially stable while values, borders, and state colors change.
+- Respect `prefers-reduced-motion`; educational meaning must not depend on animation alone.
+- On small screens, preserve algorithm state and primary controls before secondary prose or metadata.
 
-Focus on:
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+## Final design check
 
-NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
-
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
-
-**IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
-
-## Design Intelligence
-
-Use the bundled design search tooling when you need concrete guidance that should shape implementation rather than generic inspiration.
-
-Reach for `.claude/skills/frontend-design/scripts/search.py` when you need any of the following:
-- a style direction that fits a product category or audience
-- a color system, typography pairing, or chart recommendation
-- UX or accessibility guidance for a specific interface problem
-- stack-specific frontend advice for React, Next.js, Vue, Tailwind, and other supported stacks
-- a full design-system recommendation grounded in the bundled dataset
-
-Skip the search when the user already gave a precise visual direction and the implementation path is obvious.
-
-### Search Workflow
-
-1. Start with the smallest query that captures the product or interface type.
-2. Use auto-detection first; add `--domain` only when you know what kind of answer you need.
-3. Add `--stack` when framework-specific implementation details matter.
-4. Synthesize the retrieved guidance into one cohesive direction instead of pasting disconnected search results into the final answer.
-
-### Quick Start
-
-```bash
-# Auto-detect the best domain from a concise query
-python3 .claude/skills/frontend-design/scripts/search.py "glassmorphism dark mode"
-
-# Ask for a specific kind of guidance
-python3 .claude/skills/frontend-design/scripts/search.py "healthcare saas" --domain colors
-
-# Add framework context when implementation details matter
-python3 .claude/skills/frontend-design/scripts/search.py "responsive layout" --stack html-tailwind
-```
-
-### High-Value Defaults
-
-Treat these as strong defaults, not blind rules:
-- Prefer SVG icon systems over emoji so the UI feels product-grade and stylistically consistent.
-- Keep clickable elements obviously interactive, including pointer cues where the platform expects them.
-- Protect readability first; contrast and hierarchy matter more than visual gimmicks.
-- In light mode, translucent surfaces need enough opacity to stay legible.
-- Floating elements look more intentional when they breathe instead of touching viewport edges.
-- Prefer hover treatments that preserve layout stability unless movement is a deliberate part of the concept.
-
-### References
-
-- `references/design-system-generation.md` — use when the user wants a full design-system or style-guide recommendation for a project type (e.g. "SaaS dashboard", "e-commerce luxury", "fintech app") assembled from multiple search domains
-- `references/quality-checklist.md` — use as the final self-critique pass before delivering UI work
-
-## Gotchas
-
-- **Defaulting to safe choices**: Inter font + blue primary + white background is AI slop. Be distinctive.
-- **Using search as decoration**: Retrieved guidance should change the design system or implementation decisions, not just add buzzwords.
-- **Inconsistent design system**: Don't mix unrelated tokens or visual languages. Commit to one system throughout.
-- **Ignoring contrast ratios**: WCAG AA minimum. Beautiful but unreadable is a failure.
-- **Purple gradients**: The #1 AI cliché. Avoid unless specifically requested.
-- **Interaction polish gaps**: Missing hover/focus states or weak affordances make even strong visuals feel unfinished.
-
-## Data Source
-
-Remote: [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/main/src/ui-ux-pro-max/data)
-
-Available domains include styles, colors, typography, charts, products, landing, ux, icons, ui-reasoning, and web-interface. Supported stacks include html-tailwind, react, nextjs, astro, vue, nuxtjs, nuxt-ui, svelte, swiftui, react-native, flutter, shadcn, and jetpack-compose.
-
-Search uses a cached BM25 ranking script over the remote dataset, so prefer concise, concrete queries over long prompt-like paragraphs.
-
-
-Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+Confirm visual hierarchy, responsive behavior, both themes, focus order, loading/empty/error states, and consistency with neighboring lessons. Run the project's lint and production build after implementation.
